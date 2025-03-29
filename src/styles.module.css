@@ -19,6 +19,7 @@
   box-sizing: border-box;
   border-radius: 0;
   -webkit-appearance: initial;
+  appearance: initial;
   flex: 1 0 0%;
   width: 100%;
   max-width: 100%;
@@ -63,12 +64,6 @@
   opacity: 0.5;
   filter: blur(0.5px);
   transition: opacity 0.3s;
-}
-
-.title {
-  margin: 0;
-  height: 20px;
-  padding-bottom: 10px;
 }
 
 .spin {

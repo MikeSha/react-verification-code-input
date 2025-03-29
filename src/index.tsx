@@ -1,34 +1,19 @@
-import React, {
-  RefObject,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-  createRef
-} from 'react';
+import React, { RefObject, useEffect, useImperativeHandle, useRef, useState, createRef, JSX } from 'react';
 
-import styles from './styles.css';
+import styles from './styles.module.css';
+import { CODE, CODE_LIST } from './constants';
 
-export const CODE = {
-  backspace: 'Backspace',
-  left: 'ArrowLeft',
-  up: 'ArrowUp',
-  right: 'ArrowRight',
-  down: 'ArrowDown'
-};
-
-interface ReactCodeInputRefInstance {
+export interface ReactCodeInputRefInstance {
   clearValues(): void;
 }
 
-interface ReactCodeInputProps {
+export interface ReactCodeInputProps {
   type?: 'text' | 'number';
   onChange?: (val: string) => void;
   onComplete?: (val: string) => void;
   fields?: number;
   loading?: boolean;
-  title?: string;
-  autoFocus?: boolean;
+  autoFocus?: boolean; // Shoudn't be used, but in case you need it
   className?: string;
   inputClassNames?: string | string[];
   values?: string | string[];
@@ -36,7 +21,7 @@ interface ReactCodeInputProps {
   required?: boolean;
   placeholder?: string | string[];
   id?: string;
-  loadingComponent?: JSX.Element
+  loadingComponent?: JSX.Element;
 }
 
 export const Loading: React.FC = () => (
@@ -59,10 +44,7 @@ export const Loading: React.FC = () => (
   </div>
 );
 
-const ReactCodeInput = React.forwardRef<
-  ReactCodeInputRefInstance,
-  ReactCodeInputProps
->(
+const ReactCodeInput = React.forwardRef<ReactCodeInputRefInstance, ReactCodeInputProps>(
   (
     {
       className = '',
@@ -78,24 +60,23 @@ const ReactCodeInput = React.forwardRef<
       loading = false,
       fields = 6,
       autoFocus = true,
-      title,
       loadingComponent = <Loading />
     },
     ref
   ) => {
-    const [valuesState, setValuesState] = useState([]);
+    const [valuesState, setValuesState] = useState<(string | number)[]>([]);
     const [autoFocusIndexState, setAutoFocusIndexState] = useState(0);
-    const inputRefs = useRef([]);
+    const inputRefs = useRef<RefObject<HTMLInputElement | null>[]>([]);
     const idRef = useRef(+new Date());
 
     useEffect(() => {
-      let vals = [];
+      let vals: (string | number)[] = [];
       let autoFocusIndex = 0;
 
       if (values?.length) {
         vals = [];
 
-        for (let i = 0; i < fields; i++) {
+        for (let i = 0; i < fields; i += 1) {
           vals.push(values[i] || '');
         }
 
@@ -107,26 +88,24 @@ const ReactCodeInput = React.forwardRef<
       setValuesState(vals);
       setAutoFocusIndexState(autoFocusIndex);
 
-      for (let i = 0; i < fields; i++) {
-        inputRefs.current.push(createRef());
+      for (let i = 0; i < fields; i += 1) {
+        inputRefs.current.push(createRef<HTMLInputElement>());
       }
       idRef.current = +new Date();
     }, [fields, values]);
 
     const clearValues = () => {
       setValuesState(Array(fields).fill(''));
-      inputRefs.current[0].current.focus();
+      inputRefs.current[0].current?.focus();
     };
 
     useImperativeHandle(ref, () => ({
-      clearValues: () => {
-        clearValues();
-      }
+      clearValues
     }));
 
     const triggerChange = (vals = valuesState): void => {
       const val = vals.join('');
-      onChange && onChange(val);
+      onChange?.(val);
 
       if (onComplete && val.length >= fields) {
         onComplete(val);
@@ -134,25 +113,30 @@ const ReactCodeInput = React.forwardRef<
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
-      const target = e.target as HTMLElement;
-      const index = parseInt(target.dataset.id);
+      const target = e.target as HTMLInputElement;
+      const index = parseInt(target.dataset.id as string);
       const prevIndex = index - 1;
       const nextIndex = index + 1;
-      const prev: RefObject<HTMLInputElement> = inputRefs.current[prevIndex];
-      const next: RefObject<HTMLInputElement> = inputRefs.current[nextIndex];
+      const prev: RefObject<HTMLInputElement | null> = inputRefs.current[prevIndex];
+      const next: RefObject<HTMLInputElement | null> = inputRefs.current[nextIndex];
+
+      if (CODE_LIST.some((c) => c === e.code)) {
+        e.preventDefault();
+      }
 
       switch (e.code) {
         case CODE.backspace: {
-          e.preventDefault();
           const vals = [...valuesState];
 
           if (valuesState[index]) {
             vals[index] = '';
             setValuesState(vals);
             triggerChange(vals);
-          } else if (prev) {
+          }
+
+          if (prev) {
             vals[prevIndex] = '';
-            prev.current.focus();
+            prev.current?.focus();
             setValuesState(vals);
             triggerChange(vals);
           }
@@ -160,25 +144,11 @@ const ReactCodeInput = React.forwardRef<
         }
 
         case CODE.left:
-          e.preventDefault();
-          if (prev) {
-            prev.current.focus();
-          }
+          prev?.current?.focus();
           break;
 
         case CODE.right:
-          e.preventDefault();
-          if (next) {
-            next.current.focus();
-          }
-          break;
-
-        case CODE.up:
-        case CODE.down:
-          e.preventDefault();
-          break;
-
-        default:
+          next?.current?.focus();
           break;
       }
     };
@@ -188,22 +158,19 @@ const ReactCodeInput = React.forwardRef<
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-      const index = parseInt(e.target.dataset.id);
+      const index = parseInt(e.target.dataset.id as string);
 
       if (type === 'number') {
         e.target.value = e.target.value.replace(/[^\d]/gi, '');
       }
 
-      if (
-        e.target.value === '' ||
-        (type === 'number' && !e.target.validity.valid)
-      ) {
+      if (e.target.value === '' || (type === 'number' && !e.target.validity.valid)) {
         return;
       }
 
-      let next: RefObject<HTMLInputElement>;
+      let next: RefObject<HTMLInputElement | null>;
       const value = e.target.value;
-      const vals = Object.assign([], valuesState);
+      const vals = [...valuesState];
 
       if (value.length > 1) {
         let nextIndex = value.length + index - 1;
@@ -219,51 +186,42 @@ const ReactCodeInput = React.forwardRef<
             vals[cursor] = item;
           }
         });
-        setValuesState(vals);
       } else {
         next = inputRefs.current[index + 1];
         vals[index] = value;
-        setValuesState(vals);
       }
 
+      setValuesState(vals);
+
       if (next) {
-        next.current.focus();
-        next.current.select();
+        next.current?.focus();
+        next.current?.select();
       }
 
       triggerChange(vals);
     };
 
     return (
-      <div
-        className={`${styles['react-code-input-container']} ${className}`}
-      >
-        {title && <p className={styles['title']}>{title}</p>}
+      <div className={`${styles['react-code-input-container']} ${className}`}>
         <div className={styles['react-code-input']}>
           {valuesState.map((value, index) => (
             <input
               type={type === 'number' ? 'tel' : type}
-              pattern={type === 'number' ? '[0-9]*' : null}
+              pattern={type === 'number' ? '[0-9]*' : undefined}
+              // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus={autoFocus && index === autoFocusIndexState}
               key={`${idRef}-${index}`}
               data-id={index}
               value={value}
-              id={id ? `${id}-${index}` : null}
+              id={id ? `${id}-${index}` : undefined}
               ref={inputRefs.current[index]}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               onFocus={handleFocus}
               disabled={disabled}
               required={required}
-              placeholder={
-                typeof placeholder === 'string'
-                  ? placeholder
-                  : placeholder[index]
-              }
-              className={typeof inputClassNames === 'string'
-                  ? inputClassNames
-                  : inputClassNames[index] || ''
-              }
+              placeholder={typeof placeholder === 'string' ? placeholder : placeholder[index]}
+              className={typeof inputClassNames === 'string' ? inputClassNames : inputClassNames[index] || ''}
             />
           ))}
         </div>

@@ -1,14 +1,16 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 
-import ReactCodeInput, { CODE } from '.';
+import { CODE } from './constants';
+
+import ReactCodeInput, { ReactCodeInputRefInstance } from '.';
 
 const TestComponent = () => {
-  const ref = useRef(null);
+  const ref = useRef<ReactCodeInputRefInstance>(null);
 
   return (
     <>
-      <button type="button" onClick={() => ref.current.clearValues()}>
+      <button type="button" onClick={() => ref.current?.clearValues()}>
         Clean code input
       </button>
       <ReactCodeInput ref={ref} fields={3} />
@@ -44,7 +46,7 @@ describe('<ReactCodeInput /> tests', () => {
       fireEvent.change(inputs[i], { target: { value: i } });
     }
 
-    expect(onComplete).toBeCalled();
+    expect(onComplete).toHaveBeenCalled();
   });
 
   it('should call clearValues', () => {
@@ -170,9 +172,7 @@ describe('<ReactCodeInput /> tests', () => {
   });
 
   it('should show loading component', () => {
-    const { container } = render(
-      <ReactCodeInput loading values="11" fields={2} />
-    );
+    const { container } = render(<ReactCodeInput loading values="11" fields={2} />);
 
     const loader = container.querySelector('.loading');
 
@@ -180,9 +180,7 @@ describe('<ReactCodeInput /> tests', () => {
   });
 
   it('should render inputs with IDs', () => {
-    const { container } = render(
-      <ReactCodeInput id="test-id" values="11" fields={2} />
-    );
+    const { container } = render(<ReactCodeInput id="test-id" values="11" fields={2} />);
 
     const inputs = container.querySelectorAll('input');
 
@@ -192,9 +190,7 @@ describe('<ReactCodeInput /> tests', () => {
   });
 
   it('should render inputs as a "number" type', () => {
-    const { container } = render(
-      <ReactCodeInput type="number" values="11" fields={2} />
-    );
+    const { container } = render(<ReactCodeInput type="number" values="11" fields={2} />);
 
     const inputs = container.querySelectorAll('input');
 
@@ -205,9 +201,7 @@ describe('<ReactCodeInput /> tests', () => {
   });
 
   it('should render inputs as a "text" type', () => {
-    const { container } = render(
-      <ReactCodeInput type="text" values="11" fields={2} />
-    );
+    const { container } = render(<ReactCodeInput type="text" values="11" fields={2} />);
 
     const inputs = container.querySelectorAll('input');
 
@@ -218,9 +212,7 @@ describe('<ReactCodeInput /> tests', () => {
   });
 
   it('should render inputs as a required', () => {
-    const { container } = render(
-      <ReactCodeInput required values="11" fields={2} />
-    );
+    const { container } = render(<ReactCodeInput required values="11" fields={2} />);
 
     const inputs = container.querySelectorAll('input');
 
@@ -230,9 +222,7 @@ describe('<ReactCodeInput /> tests', () => {
   });
 
   it('should render inputs as a disabled', () => {
-    const { container } = render(
-      <ReactCodeInput disabled values="11" fields={2} />
-    );
+    const { container } = render(<ReactCodeInput disabled values="11" fields={2} />);
 
     const inputs = container.querySelectorAll('input');
 
@@ -243,25 +233,18 @@ describe('<ReactCodeInput /> tests', () => {
 
   it('should render inputs with placeholders', () => {
     const { container } = render(
-      <ReactCodeInput
-        placeholder={['test-placeholder-1', 'test-placeholder-2']}
-        fields={2}
-      />
+      <ReactCodeInput placeholder={['test-placeholder-1', 'test-placeholder-2']} fields={2} />
     );
 
     const inputs = container.querySelectorAll('input');
 
     for (let i = 0; i <= inputs.length - 1; i += 1) {
-      expect(inputs[i].getAttribute('placeholder')).toBe(
-        `test-placeholder-${i + 1}`
-      );
+      expect(inputs[i].getAttribute('placeholder')).toBe(`test-placeholder-${i + 1}`);
     }
   });
 
   it('should render inputs with a placeholder (string)', () => {
-    const { container } = render(
-      <ReactCodeInput placeholder="test-placeholder" fields={2} />
-    );
+    const { container } = render(<ReactCodeInput placeholder="test-placeholder" fields={2} />);
 
     const inputs = container.querySelectorAll('input');
 
@@ -272,11 +255,7 @@ describe('<ReactCodeInput /> tests', () => {
 
   it('should render inputs with classes', () => {
     const { container } = render(
-      <ReactCodeInput
-        className="wrapper-test-class"
-        inputClassNames={['test-class-1', 'test-class-2']}
-        fields={2}
-      />
+      <ReactCodeInput className="wrapper-test-class" inputClassNames={['test-class-1', 'test-class-2']} fields={2} />
     );
 
     expect(!!container.querySelector('.wrapper-test-class')).toBe(true);
@@ -290,11 +269,7 @@ describe('<ReactCodeInput /> tests', () => {
 
   it('should render inputs with class (string)', () => {
     const { container } = render(
-      <ReactCodeInput
-        className="wrapper-test-class"
-        inputClassNames="test-class"
-        fields={2}
-      />
+      <ReactCodeInput className="wrapper-test-class" inputClassNames="test-class" fields={2} />
     );
 
     expect(!!container.querySelector('.wrapper-test-class')).toBe(true);
@@ -316,9 +291,8 @@ describe('<ReactCodeInput /> tests', () => {
   });
 
   it('should not set autoFocus', () => {
-    const { container } = render(
-      <ReactCodeInput autoFocus={false} fields={2} />
-    );
+    // eslint-disable-next-line jsx-a11y/no-autofocus
+    const { container } = render(<ReactCodeInput autoFocus={false} fields={2} />);
 
     const inputs = container.querySelectorAll('input');
 
