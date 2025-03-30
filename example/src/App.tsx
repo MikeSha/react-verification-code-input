@@ -21,9 +21,9 @@ const App: React.FC = () => {
     <div style={STYLE}>
       <ReactCodeInput
         ref={input}
-        className='custom-class'
+        className="custom-class"
         onChange={handleChange}
-        onComplete={val => console.log('complete', val)}
+        onComplete={(val: string) => console.log('complete', val)}
       />
     </div>
   );
