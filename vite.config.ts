@@ -24,7 +24,10 @@ export default defineConfig({
     },
     outDir: 'build',
     rollupOptions: {
-      external: Object.keys(packageJSON.peerDependencies)
+      external: Object.keys(packageJSON.peerDependencies),
+      output: {
+        exports: 'named'
+      }
     }
   }
 });
