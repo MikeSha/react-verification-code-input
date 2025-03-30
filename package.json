@@ -6,7 +6,7 @@
   "module": "build/index.es.js",
   "types": "build/index.d.ts",
   "version": "0.0.1",
-  "description": "Verification code input",
+  "description": "A customizable React component for verification code input fields commonly used in two-factor authentication (2FA), OTP verification, and security code confirmation workflows.",
   "keywords": [
     "react",
     "react-component",
