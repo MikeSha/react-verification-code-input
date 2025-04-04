@@ -5,7 +5,7 @@ A customizable React component for verification code input fields commonly used 
 > Originally forked from [react-verification-code-input](https://github.com/suweya/react-verification-code-input), but completely reworked with TypeScript support, accessibility improvements, and modern React patterns.
 
 ## Support me
-If you like what I'm doing, support me: https://ko-fi.com/mykeshato
+If you like what I'm doing, please support me: https://ko-fi.com/mykeshato
 
 ## Features
 
